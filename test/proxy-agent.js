@@ -375,7 +375,6 @@ test('Proxy via HTTPS to HTTPS endpoint', async (t) => {
       key: readFileSync(join(__dirname, 'fixtures', 'client-key-2048.pem'), 'utf8'),
       cert: readFileSync(join(__dirname, 'fixtures', 'client-crt-2048.pem'), 'utf8'),
       servername: 'agent1',
-      rejectUnauthorized: false
     },
     requestTls: {
       ca: [
@@ -435,8 +434,7 @@ test('Proxy via HTTPS to HTTP endpoint', async (t) => {
       ],
       key: readFileSync(join(__dirname, 'fixtures', 'client-key-2048.pem'), 'utf8'),
       cert: readFileSync(join(__dirname, 'fixtures', 'client-crt-2048.pem'), 'utf8'),
-      servername: 'agent1',
-      rejectUnauthorized: false
+      servername: 'agent1'
     }
   })
 
