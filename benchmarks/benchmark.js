@@ -260,7 +260,15 @@ if (process.env.PORT) {
   experiments['undici - fetch'] = () => {
     return makeParallelRequests(resolve => {
       fetch(dest.url).then(res => {
-        res.body.pipeTo(new WritableStream({ write () {}, close () { resolve() } }))
+        res.body.pipe(
+            new Writable({
+              write (chunk, encoding, callback) {
+                callback()
+              }
+            })
+          )
+          .on('finish', resolve)
+        // res.body.pipeTo(new WritableStream({ write () {}, close () { resolve() } }))
       }).catch(console.log)
     })
   }
