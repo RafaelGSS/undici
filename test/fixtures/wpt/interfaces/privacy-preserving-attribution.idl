@@ -25,14 +25,17 @@ interface PrivateAttribution {
 
 dictionary PrivateAttributionImpressionOptions {
   required unsigned long histogramIndex;
-  unsigned long filterData = 0;
-  required USVString conversionSite;
+  unsigned long matchValue = 0;
+  sequence<USVString> conversionSites = [];
   unsigned long lifetimeDays = 30;
+};
+
+dictionary PrivateAttributionImpressionResult {
 };
 
 [SecureContext, Exposed=Window]
 partial interface PrivateAttribution {
-  undefined saveImpression(PrivateAttributionImpressionOptions options);
+  Promise<PrivateAttributionImpressionResult> saveImpression(PrivateAttributionImpressionOptions options);
 };
 
 dictionary PrivateAttributionConversionOptions {
@@ -42,7 +45,7 @@ dictionary PrivateAttributionConversionOptions {
   required unsigned long histogramSize;
 
   unsigned long lookbackDays;
-  unsigned long filterData;
+  sequence<unsigned long> matchValue = [];
   sequence<USVString> impressionSites = [];
   sequence<USVString> intermediarySites = [];
 
