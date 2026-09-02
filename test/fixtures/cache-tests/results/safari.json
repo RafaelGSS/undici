@@ -144,7 +144,10 @@
     "Request 2 header If-None-Match is \"abcdef\", not \"\"abcdef\"\""
   ],
   "conditional-etag-vary-headers": true,
-  "conditional-etag-vary-headers-mismatch": true,
+  "conditional-etag-vary-headers-mismatch": [
+    "Assertion",
+    "Request 2 header If-None-Match is \"undefined\", not \"\"abcdef\"\""
+  ],
   "conditional-etag-weak-generate-weak": true,
   "freshness-expires-32bit": true,
   "freshness-expires-age-fast-date": true,
@@ -200,7 +203,7 @@
     "Response 2 does not come from cache"
   ],
   "freshness-max-age-age": true,
-  "freshness-max-age-case-insenstive": true,
+  "freshness-max-age-case-insensitive": true,
   "freshness-max-age-date": true,
   "freshness-max-age-decimal-five": true,
   "freshness-max-age-decimal-zero": true,
