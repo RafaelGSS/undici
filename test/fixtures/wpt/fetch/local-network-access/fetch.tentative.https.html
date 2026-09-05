@@ -11,11 +11,11 @@
   "use strict";
 
   promise_test(t => {
-    const sourceUrl = resolveUrl("resources/fetch-private.html",
+    const sourceUrl = resolveUrl("resources/fetch-local.html",
         sourceResolveOptions({ server: Server.HTTPS_PUBLIC }));
 
     function checkResult(evt) {
-      checkTestResult(evt.data, FetchTestResult.SUCCESS);
+      checkFetchTestResult(evt.data, FetchTestResult.SUCCESS);
       t.done();
     }
 
@@ -26,16 +26,16 @@
     t.add_cleanup(() => popup.close());
 
     return promise;
-  }, 'LNA Public to private with permission');
+  }, 'LNA Public to local with permission');
 
   promise_test(t => {
     // TODO(crbug.com/406991278): consider moving permission url param into
     // options
-    const sourceUrl = resolveUrl("resources/fetch-private.html?permission=denied",
+    const sourceUrl = resolveUrl("resources/fetch-local.html?permission=denied",
         sourceResolveOptions({ server: Server.HTTPS_PUBLIC }));
 
     function checkResult(evt) {
-      checkTestResult(evt.data, FetchTestResult.FAILURE);
+      checkFetchTestResult(evt.data, FetchTestResult.FAILURE);
       t.done();
     }
 
@@ -46,14 +46,14 @@
     t.add_cleanup(() => popup.close());
 
     return promise;
-  }, 'LNA Public to private with permission denied');
+  }, 'LNA Public to local with permission denied');
 
   promise_test(t => {
-    const sourceUrl = resolveUrl("resources/fetch-private-http.html",
+    const sourceUrl = resolveUrl("resources/fetch-local-http.html",
         sourceResolveOptions({ server: Server.HTTPS_PUBLIC }));
 
     function checkResult(evt) {
-      checkTestResult(evt.data, FetchTestResult.SUCCESS);
+      checkFetchTestResult(evt.data, FetchTestResult.SUCCESS);
       t.done();
     }
 
@@ -64,14 +64,14 @@
     t.add_cleanup(() => popup.close());
 
     return promise;
-  }, 'LNA Public to private http mixed content bypass');
+  }, 'LNA Public to local http mixed content bypass');
 
   promise_test(t => {
     const sourceUrl = resolveUrl("resources/fetch-public-http-wrong-address-space.html",
         sourceResolveOptions({ server: Server.HTTPS_PUBLIC }));
 
     function checkResult(evt) {
-      checkTestResult(evt.data, FetchTestResult.FAILURE);
+      checkFetchTestResult(evt.data, FetchTestResult.FAILURE);
       t.done();
     }
 

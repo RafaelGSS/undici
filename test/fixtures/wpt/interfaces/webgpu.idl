@@ -11,6 +11,32 @@ dictionary GPUObjectDescriptorBase {
     USVString label = "";
 };
 
+enum GPUFeatureName {
+    "core-features-and-limits",
+    "depth-clip-control",
+    "depth32float-stencil8",
+    "texture-compression-bc",
+    "texture-compression-bc-sliced-3d",
+    "texture-compression-etc2",
+    "texture-compression-astc",
+    "texture-compression-astc-sliced-3d",
+    "timestamp-query",
+    "indirect-first-instance",
+    "shader-f16",
+    "rg11b10ufloat-renderable",
+    "bgra8unorm-storage",
+    "float32-filterable",
+    "float32-blendable",
+    "clip-distances",
+    "dual-source-blending",
+    "subgroups",
+    "texture-formats-tier1",
+    "texture-formats-tier2",
+    "primitive-index",
+    "texture-component-swizzle",
+    "subgroup-size-control",
+};
+
 [Exposed=(Window, Worker), SecureContext]
 interface GPUSupportedLimits {
     readonly attribute unsigned long maxTextureDimension1D;
@@ -19,13 +45,18 @@ interface GPUSupportedLimits {
     readonly attribute unsigned long maxTextureArrayLayers;
     readonly attribute unsigned long maxBindGroups;
     readonly attribute unsigned long maxBindGroupsPlusVertexBuffers;
+    readonly attribute unsigned long maxImmediateSize;
     readonly attribute unsigned long maxBindingsPerBindGroup;
     readonly attribute unsigned long maxDynamicUniformBuffersPerPipelineLayout;
     readonly attribute unsigned long maxDynamicStorageBuffersPerPipelineLayout;
     readonly attribute unsigned long maxSampledTexturesPerShaderStage;
     readonly attribute unsigned long maxSamplersPerShaderStage;
     readonly attribute unsigned long maxStorageBuffersPerShaderStage;
+    readonly attribute unsigned long maxStorageBuffersInVertexStage;
+    readonly attribute unsigned long maxStorageBuffersInFragmentStage;
     readonly attribute unsigned long maxStorageTexturesPerShaderStage;
+    readonly attribute unsigned long maxStorageTexturesInVertexStage;
+    readonly attribute unsigned long maxStorageTexturesInFragmentStage;
     readonly attribute unsigned long maxUniformBuffersPerShaderStage;
     readonly attribute unsigned long long maxUniformBufferBindingSize;
     readonly attribute unsigned long long maxStorageBufferBindingSize;
@@ -106,27 +137,6 @@ dictionary GPUDeviceDescriptor
     sequence<GPUFeatureName> requiredFeatures = [];
     record<DOMString, (GPUSize64 or undefined)> requiredLimits = {};
     GPUQueueDescriptor defaultQueue = {};
-};
-
-enum GPUFeatureName {
-    "core-features-and-limits",
-    "depth-clip-control",
-    "depth32float-stencil8",
-    "texture-compression-bc",
-    "texture-compression-bc-sliced-3d",
-    "texture-compression-etc2",
-    "texture-compression-astc",
-    "texture-compression-astc-sliced-3d",
-    "timestamp-query",
-    "indirect-first-instance",
-    "shader-f16",
-    "rg11b10ufloat-renderable",
-    "bgra8unorm-storage",
-    "float32-filterable",
-    "float32-blendable",
-    "clip-distances",
-    "dual-source-blending",
-    "subgroups",
 };
 
 [Exposed=(Window, Worker), SecureContext]
@@ -225,6 +235,7 @@ interface GPUTexture {
     readonly attribute GPUTextureDimension dimension;
     readonly attribute GPUTextureFormat format;
     readonly attribute GPUFlagsConstant usage;
+    readonly attribute (GPUTextureViewDimension or undefined) textureBindingViewDimension;
 };
 GPUTexture includes GPUObjectBase;
 
@@ -237,6 +248,7 @@ dictionary GPUTextureDescriptor
     required GPUTextureFormat format;
     required GPUTextureUsageFlags usage;
     sequence<GPUTextureFormat> viewFormats = [];
+    GPUTextureViewDimension textureBindingViewDimension;
 };
 
 enum GPUTextureDimension {
@@ -248,11 +260,12 @@ enum GPUTextureDimension {
 typedef [EnforceRange] unsigned long GPUTextureUsageFlags;
 [Exposed=(Window, Worker), SecureContext]
 namespace GPUTextureUsage {
-    const GPUFlagsConstant COPY_SRC          = 0x01;
-    const GPUFlagsConstant COPY_DST          = 0x02;
-    const GPUFlagsConstant TEXTURE_BINDING   = 0x04;
-    const GPUFlagsConstant STORAGE_BINDING   = 0x08;
-    const GPUFlagsConstant RENDER_ATTACHMENT = 0x10;
+    const GPUFlagsConstant COPY_SRC             = 0x01;
+    const GPUFlagsConstant COPY_DST             = 0x02;
+    const GPUFlagsConstant TEXTURE_BINDING      = 0x04;
+    const GPUFlagsConstant STORAGE_BINDING      = 0x08;
+    const GPUFlagsConstant RENDER_ATTACHMENT    = 0x10;
+    const GPUFlagsConstant TRANSIENT_ATTACHMENT = 0x20;
 };
 
 [Exposed=(Window, Worker), SecureContext]
@@ -270,6 +283,9 @@ dictionary GPUTextureViewDescriptor
     GPUIntegerCoordinate mipLevelCount;
     GPUIntegerCoordinate baseArrayLayer = 0;
     GPUIntegerCoordinate arrayLayerCount;
+
+    // Requires "texture-component-swizzle" feature.
+    DOMString swizzle = "rgba";
 };
 
 enum GPUTextureViewDimension {
@@ -295,6 +311,8 @@ enum GPUTextureFormat {
     "r8sint",
 
     // 16-bit formats
+    "r16unorm",
+    "r16snorm",
     "r16uint",
     "r16sint",
     "r16float",
@@ -307,6 +325,8 @@ enum GPUTextureFormat {
     "r32uint",
     "r32sint",
     "r32float",
+    "rg16unorm",
+    "rg16snorm",
     "rg16uint",
     "rg16sint",
     "rg16float",
@@ -327,6 +347,8 @@ enum GPUTextureFormat {
     "rg32uint",
     "rg32sint",
     "rg32float",
+    "rgba16unorm",
+    "rgba16snorm",
     "rgba16uint",
     "rgba16sint",
     "rgba16float",
@@ -556,7 +578,12 @@ dictionary GPUBindGroupDescriptor
     required sequence<GPUBindGroupEntry> entries;
 };
 
-typedef (GPUSampler or GPUTextureView or GPUBufferBinding or GPUExternalTexture) GPUBindingResource;
+typedef (GPUSampler or
+         GPUTexture or
+         GPUTextureView or
+         GPUBuffer or
+         GPUBufferBinding or
+         GPUExternalTexture) GPUBindingResource;
 
 dictionary GPUBindGroupEntry {
     required GPUIndex32 binding;
@@ -577,6 +604,7 @@ GPUPipelineLayout includes GPUObjectBase;
 dictionary GPUPipelineLayoutDescriptor
          : GPUObjectDescriptorBase {
     required sequence<GPUBindGroupLayout?> bindGroupLayouts;
+    GPUSize32 immediateSize = 0;
 };
 
 [Exposed=(Window, Worker), SecureContext]
@@ -857,6 +885,7 @@ enum GPUVertexFormat {
     "sint32x4",
     "unorm10-10-10-2",
     "unorm8x4-bgra",
+    "snorm10-10-10-2",
 };
 
 enum GPUVertexStepMode {
@@ -990,9 +1019,12 @@ interface mixin GPUBindingCommandsMixin {
         optional sequence<GPUBufferDynamicOffset> dynamicOffsets = []);
 
     undefined setBindGroup(GPUIndex32 index, GPUBindGroup? bindGroup,
-        Uint32Array dynamicOffsetsData,
+        [AllowShared] Uint32Array dynamicOffsetsData,
         GPUSize64 dynamicOffsetsDataStart,
         GPUSize32 dynamicOffsetsDataLength);
+
+    undefined setImmediates(GPUSize32 rangeOffset, AllowSharedBufferSource data,
+        optional GPUSize64 dataOffset = 0, optional GPUSize64 dataSize);
 };
 
 interface mixin GPUDebugCommandsMixin {
@@ -1065,9 +1097,9 @@ dictionary GPURenderPassDescriptor
 };
 
 dictionary GPURenderPassColorAttachment {
-    required GPUTextureView view;
+    required (GPUTexture or GPUTextureView) view;
     GPUIntegerCoordinate depthSlice;
-    GPUTextureView resolveTarget;
+    (GPUTexture or GPUTextureView) resolveTarget;
 
     GPUColor clearValue;
     required GPULoadOp loadOp;
@@ -1075,7 +1107,7 @@ dictionary GPURenderPassColorAttachment {
 };
 
 dictionary GPURenderPassDepthStencilAttachment {
-    required GPUTextureView view;
+    required (GPUTexture or GPUTextureView) view;
 
     float depthClearValue;
     GPULoadOp depthLoadOp;
