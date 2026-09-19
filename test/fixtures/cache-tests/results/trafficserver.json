@@ -97,7 +97,7 @@
   "cdn-date-update-exceed": true,
   "cdn-expires-update-exceed": [
     "Assertion",
-    "Response 2 header Expires is \"null\", not \"Mon, 03 Feb 2025 05:35:20 GMT\""
+    "Response 2 header Expires is \"null\", not \"Mon, 29 Dec 2025 00:26:14 GMT\""
   ],
   "cdn-fresh-cc-nostore": [
     "Assertion",
@@ -188,7 +188,10 @@
   "conditional-etag-unquoted-respond-quoted": true,
   "conditional-etag-unquoted-respond-unquoted": true,
   "conditional-etag-vary-headers": true,
-  "conditional-etag-vary-headers-mismatch": true,
+  "conditional-etag-vary-headers-mismatch": [
+    "Assertion",
+    "Request 2 header If-None-Match is \"undefined\", not \"\"abcdef\"\""
+  ],
   "conditional-etag-weak-generate-weak": [
     "Assertion",
     "Request 2 should have been conditional, but it was not."
@@ -268,7 +271,7 @@
   "freshness-max-age-100a": true,
   "freshness-max-age-a100": true,
   "freshness-max-age-age": true,
-  "freshness-max-age-case-insenstive": true,
+  "freshness-max-age-case-insensitive": true,
   "freshness-max-age-date": true,
   "freshness-max-age-decimal-five": true,
   "freshness-max-age-decimal-zero": true,
@@ -455,6 +458,22 @@
   "heuristic-delta-86400": [
     "Assertion",
     "Response 2 does not come from cache"
+  ],
+  "interim-102": [
+    "AbortError",
+    "This operation was aborted"
+  ],
+  "interim-103": [
+    "Assertion",
+    "Interim response 1 not received"
+  ],
+  "interim-no-header-reuse": [
+    "Assertion",
+    "Interim response 1 not received"
+  ],
+  "interim-not-cached": [
+    "Assertion",
+    "Interim response 1 not received"
   ],
   "invalidate-DELETE": [
     "Setup",
