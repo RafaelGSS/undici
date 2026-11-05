@@ -14,7 +14,7 @@ export default
       requests: [
         {
           response_headers: [
-            ['Expires', 'Tue, 19 Jan 2038 14:14:08 GMT', false],
+            ['Expires', 'Tue, 19 Jan 2038 03:14:08 GMT', false],
             ['Date', 0]
           ],
           setup: true,
@@ -33,7 +33,7 @@ export default
       requests: [
         {
           response_headers: [
-            ['Expires', 'Sun, 21 Nov 2286 04:46:39 GMT', false],
+            ['Expires', 'Sat, 20 Nov 2286 17:46:39 GMT', false],
             ['Date', 0]
           ],
           setup: true,
@@ -71,7 +71,7 @@ export default
       requests: [
         {
           response_headers: [
-            ['Expires', 'Thu Aug  8 02:01:18 2050', false],
+            ['Expires', 'Mon Aug  8 02:01:18 2050', false],
             ['Date', 0]
           ],
           setup: true,
@@ -142,6 +142,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (UTC)',
       id: 'freshness-expires-invalid-utc',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -160,6 +161,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (other tz)',
       id: 'freshness-expires-invalid-aest',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -178,6 +180,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (two-digit year)',
       id: 'freshness-expires-invalid-2-digit-year',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -196,6 +199,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (missing comma)',
       id: 'freshness-expires-invalid-no-comma',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -214,6 +218,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (multiple spaces)',
       id: 'freshness-expires-invalid-multiple-spaces',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -231,6 +236,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (date dashes)',
       id: 'freshness-expires-invalid-date-dashes',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -248,6 +254,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (time periods)',
       id: 'freshness-expires-invalid-time-periods',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -265,6 +272,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (1-digit hour)',
       id: 'freshness-expires-invalid-1-digit-hour',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -282,6 +290,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (multiple lines)',
       id: 'freshness-expires-invalid-multiple-lines',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -294,6 +303,25 @@ export default
         },
         {
           expected_type: 'not_cached'
+        }
+      ]
+    },
+    {
+      name: 'Does HTTP cache reuse a response with a future `Expires` whose day-of-week does not match its date?',
+      id: 'freshness-expires-wrong-weekday',
+      depends_on: ['freshness-expires-future'],
+      kind: 'check',
+      requests: [
+        {
+          response_headers: [
+            ['Expires', 'Fri, 18 Aug 2050 02:01:18 GMT', false],
+            ['Date', 0]
+          ],
+          setup: true,
+          pause_after: true
+        },
+        {
+          expected_type: 'cached'
         }
       ]
     }

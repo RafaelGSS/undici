@@ -3,7 +3,7 @@ import * as templates from './lib/templates.mjs'
 export default
 
 {
-  name: 'Storing Respones to Authenticated Requests',
+  name: 'Storing Responses to Authenticated Requests',
   id: 'auth',
   description: 'These tests check for behaviours regarding authenticated HTTP responses.',
   spec_anchors: ['caching.authenticated.responses'],
@@ -11,6 +11,7 @@ export default
     {
       name: 'HTTP shared cache must not reuse a response to a request that contained `Authorization`, even with explicit freshness',
       id: 'other-authorization',
+      spec_anchors: ['caching.authenticated.responses'],
       depends_on: ['freshness-max-age'],
       browser_skip: true,
       requests: [

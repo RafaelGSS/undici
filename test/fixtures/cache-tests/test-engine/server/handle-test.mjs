@@ -43,6 +43,17 @@ function continueHandleTest (uuid, request, response, requests, serverState) {
   const previousConfig = requests[reqNum - 2]
   const now = Date.now()
 
+  const interimResponses = reqConfig.interim_responses || []
+  for (const [status, headers = []] of interimResponses) {
+    if (status === 102) {
+      response.writeProcessing()
+    } else if (status === 103) {
+      response.writeEarlyHints(Object.fromEntries(headers))
+    } else {
+      console.log(`ERROR: Sending ${status} is not yet supported`)
+    }
+  }
+
   // Determine what the response status should be
   let httpStatus = reqConfig.response_status || [200, 'OK']
   if ('expected_type' in reqConfig && reqConfig.expected_type.endsWith('validated')) {
@@ -59,7 +70,7 @@ function continueHandleTest (uuid, request, response, requests, serverState) {
     }
   }
   response.statusCode = httpStatus[0]
-  response.statusPhrase = httpStatus[1]
+  response.statusMessage = httpStatus[1]
 
   // header manipulation
   const responseHeaders = reqConfig.response_headers || []
@@ -96,7 +107,8 @@ function continueHandleTest (uuid, request, response, requests, serverState) {
     request_num: cliReqNum,
     request_method: request.method,
     request_headers: request.headers,
-    response_headers: Array.from(savedHeaders.entries())
+    response_headers: Array.from(savedHeaders.entries()),
+    response: describeResponse(response, reqConfig, interimResponses)
   })
   response.setHeader('Request-Numbers', serverState.map(item => item.request_num).join(' '))
   setStash(uuid, serverState)
@@ -114,5 +126,21 @@ function continueHandleTest (uuid, request, response, requests, serverState) {
   }
 
   // logging
-  if (reqConfig.dump) logResponse(response, srvReqNum)
+  if (reqConfig.dump) logResponse(response, interimResponses, srvReqNum)
+}
+
+// what we sent, for traces; the body is only included when it isn't the test's UUID
+function describeResponse (response, reqConfig, interimResponses) {
+  const description = {
+    status: response.statusCode,
+    headers: response.getHeaders()
+  }
+  const interim = interimResponses.map(([status, headers = []]) => [status, Object.fromEntries(headers)])
+  if (interim.length) description.interim = interim
+  if (reqConfig.disconnect) {
+    description.disconnect = true
+  } else if (reqConfig.response_body && !noBodyStatus.has(response.statusCode)) {
+    description.body = reqConfig.response_body
+  }
+  return description
 }
