@@ -12,7 +12,7 @@ function checkStatus (status) {
   }
   const is3xx = code > 299 && code < 400
   tests.push({
-    name: 'An optimal HTTP cache reuses a fresh `' + code + '` response with explict freshness',
+    name: 'An optimal HTTP cache reuses a fresh `' + code + '` response with explicit freshness',
     id: `status-${code}-fresh`,
     kind: 'optimal',
     depends_on: ['freshness-max-age'],
@@ -33,6 +33,7 @@ function checkStatus (status) {
   tests.push({
     name: 'HTTP cache must not reuse a stale `' + code + '` response with explicit freshness',
     id: `status-${code}-stale`,
+    spec_anchors: ['response.cacheability'],
     depends_on: [`status-${code}-fresh`],
     browser_skip: is3xx,
     requests: [
