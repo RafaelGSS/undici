@@ -7,14 +7,14 @@ export default
   spec_anchors: ['field.expires'],
   tests: [
     {
-      name: 'An optimal HTTP cache reuses a response with an `Expires` that is exactly 32 bits',
-      id: 'freshness-expires-32bit',
+      name: 'An optimal HTTP cache reuses a response with an `Expires` that is far in the future',
+      id: 'freshness-expires-far-future',
       kind: 'optimal',
       depends_on: ['freshness-expires-future'],
       requests: [
         {
           response_headers: [
-            ['Expires', 'Tue, 19 Jan 2038 14:14:08 GMT', false],
+            ['Expires', 'Sat, 20 Nov 2286 17:46:39 GMT', false],
             ['Date', 0]
           ],
           setup: true,
@@ -26,14 +26,35 @@ export default
       ]
     },
     {
-      name: 'An optimal HTTP cache reuses a response with an `Expires` that is far in the future',
-      id: 'freshness-expires-far-future',
+      name: 'An optimal HTTP cache reuses a response with an `Expires` of Fri, 11 Apr 2262 23:47:16 GMT (maximum 64-bit nanosecond time)',
+      id: 'freshness-expires-int64-ns-max',
       kind: 'optimal',
       depends_on: ['freshness-expires-future'],
+      spec_anchors: ['field.expires'],
       requests: [
         {
           response_headers: [
-            ['Expires', 'Sun, 21 Nov 2286 04:46:39 GMT', false],
+            ['Expires', 'Fri, 11 Apr 2262 23:47:16 GMT', false],
+            ['Date', 0]
+          ],
+          setup: true,
+          pause_after: true
+        },
+        {
+          expected_type: 'cached'
+        }
+      ]
+    },
+    {
+      name: 'An optimal HTTP cache reuses a response with an `Expires` of Fri, 31 Dec 9999 23:59:59 GMT (maximum HTTP-date)',
+      id: 'freshness-expires-http-date-max',
+      kind: 'optimal',
+      depends_on: ['freshness-expires-future'],
+      spec_anchors: ['field.expires'],
+      requests: [
+        {
+          response_headers: [
+            ['Expires', 'Fri, 31 Dec 9999 23:59:59 GMT', false],
             ['Date', 0]
           ],
           setup: true,
@@ -71,7 +92,47 @@ export default
       requests: [
         {
           response_headers: [
-            ['Expires', 'Thu Aug  8 02:01:18 2050', false],
+            ['Expires', 'Mon Aug  8 02:01:18 2050', false],
+            ['Date', 0]
+          ],
+          setup: true,
+          pause_after: true
+        },
+        {
+          expected_type: 'cached'
+        }
+      ]
+    },
+    {
+      name: "An optimal HTTP cache reuses a response with a future `Expires` of Fri Apr 11 23:47:16 2262 (maximum 64-bit nanosecond time) in ANSI C's asctime() format",
+      id: 'freshness-expires-ansi-c-int64-ns-max',
+      kind: 'optimal',
+      depends_on: ['freshness-expires-ansi-c'],
+      spec_anchors: ['field.expires'],
+      requests: [
+        {
+          response_headers: [
+            ['Expires', 'Fri Apr 11 23:47:16 2262', false],
+            ['Date', 0]
+          ],
+          setup: true,
+          pause_after: true
+        },
+        {
+          expected_type: 'cached'
+        }
+      ]
+    },
+    {
+      name: "An optimal HTTP cache reuses a response with a future `Expires` of Fri Dec 31 23:59:59 9999 (maximum HTTP-date) in ANSI C's asctime() format",
+      id: 'freshness-expires-ansi-c-http-date-max',
+      kind: 'optimal',
+      depends_on: ['freshness-expires-ansi-c'],
+      spec_anchors: ['field.expires'],
+      requests: [
+        {
+          response_headers: [
+            ['Expires', 'Fri Dec 31 23:59:59 9999', false],
             ['Date', 0]
           ],
           setup: true,
@@ -142,6 +203,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (UTC)',
       id: 'freshness-expires-invalid-utc',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -160,6 +222,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (other tz)',
       id: 'freshness-expires-invalid-aest',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -178,6 +241,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (two-digit year)',
       id: 'freshness-expires-invalid-2-digit-year',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -196,6 +260,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (missing comma)',
       id: 'freshness-expires-invalid-no-comma',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -214,6 +279,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (multiple spaces)',
       id: 'freshness-expires-invalid-multiple-spaces',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -231,6 +297,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (date dashes)',
       id: 'freshness-expires-invalid-date-dashes',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -248,6 +315,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (time periods)',
       id: 'freshness-expires-invalid-time-periods',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -265,6 +333,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (1-digit hour)',
       id: 'freshness-expires-invalid-1-digit-hour',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -282,6 +351,7 @@ export default
     {
       name: 'HTTP cache must not reuse a response with an invalid `Expires` (multiple lines)',
       id: 'freshness-expires-invalid-multiple-lines',
+      spec_anchors: ['field.expires'],
       depends_on: ['freshness-expires-future'],
       requests: [
         {
@@ -294,6 +364,25 @@ export default
         },
         {
           expected_type: 'not_cached'
+        }
+      ]
+    },
+    {
+      name: 'Does HTTP cache reuse a response with a future `Expires` whose day-of-week does not match its date?',
+      id: 'freshness-expires-wrong-weekday',
+      depends_on: ['freshness-expires-future'],
+      kind: 'check',
+      requests: [
+        {
+          response_headers: [
+            ['Expires', 'Fri, 18 Aug 2050 02:01:18 GMT', false],
+            ['Date', 0]
+          ],
+          setup: true,
+          pause_after: true
+        },
+        {
+          expected_type: 'cached'
         }
       ]
     }
