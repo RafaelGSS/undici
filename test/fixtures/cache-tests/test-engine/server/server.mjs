@@ -39,12 +39,11 @@ let server
 if (protocol.toLowerCase() === 'https') {
   const options = {
     key: fs.readFileSync(process.env.npm_config_keyfile),
-    cert: fs.readFileSync(process.env.npm_config_certfile),
-    joinDuplicateHeaders: true
+    cert: fs.readFileSync(process.env.npm_config_certfile)
   }
   server = https.createServer(options, handleMain)
 } else {
-  server = http.createServer({ joinDuplicateHeaders: true }, handleMain)
+  server = http.createServer(handleMain)
 }
 server.on('listening', () => {
   const host = (server.address().family === 'IPv6')
@@ -52,4 +51,13 @@ server.on('listening', () => {
     : server.address().address
   console.log(`Listening on ${protocol.toLowerCase()}://${host}:${server.address().port}/`)
 })
-server.listen(port)
+await new Promise((resolve, reject) => {
+  function onListening () {
+    server.off('error', reject)
+    resolve()
+  }
+
+  server.once('listening', onListening)
+  server.once('error', reject)
+  server.listen(port)
+})
